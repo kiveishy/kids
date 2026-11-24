@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}הִיסְטוֹרְיַת מְשִׂימוֹת{% endblock %}
+
+{% block content %}
+<main>
+  <h1 class="page-title">📅 הִיסְטוֹרְיַת מְשִׂימוֹת</h1>
+  {% if not rows %}
+    <p class="empty">עֲדַיִן אֵין מְשִׂימוֹת.</p>
+  {% else %}
+  <table class="history">
+    <thead>
+      <tr><th>יום</th><th>פעילות</th><th>התחלה</th><th>סיום</th><th>התקדמות</th><th>פעילות אחרונה</th><th>מצב</th></tr>
+    </thead>
+    <tbody>
+    {% for r in rows %}
+      <tr class="{{ r.status }}">
+        <td>{{ r.day }}</td>
+        <td>{{ r.activity_name }}</td>
+        <td>{{ r.started_at[11:] }}</td>
+        <td>{{ r.finished_at[11:] if r.finished_at else '—' }}</td>
+        <td>
+          <div class="progress-track small"><div class="progress-fill" style="width: {{ r.percent }}%"></div></div>
+          {{ r.done }} / {{ r.total }} ({{ r.percent }}%)
+        </td>
+        <td>{{ r.last_click[11:] if r.last_click else '—' }}</td>
+        <td>{{ {'done': '✅ הושלם', 'open': '⏳ בתהליך', 'unfinished': '❌ לא הושלם'}[r.status] }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</main>
+{% endblock %}

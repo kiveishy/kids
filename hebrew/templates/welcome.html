@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}לוֹמְדִים – בָּרוּכִים הַבָּאִים{% endblock %}
+{% block body_class %}welcome-page{% endblock %}
+{% block sidebar %}{% endblock %}
+
+{% block content %}
+<main class="welcome">
+  <h1>
+    👋 {{ welcome_text }}
+    {% if audio_url('ui/welcome.mp3') %}
+    <button class="say" data-say-audio="{{ audio_url('ui/welcome.mp3') }}" title="הַשְׁמֵעַ">🔊</button>
+    {% endif %}
+  </h1>
+  <div class="menu-cards">
+    {% for s in subjects %}
+    <a class="menu-card big" href="{{ s.url }}" style="--card-color: {{ s.color }}">
+      <span class="menu-emoji">{{ s.emoji }}</span>
+      <span class="menu-title">{{ s.title }}</span>
+      {% set clip = audio_url('ui/menu_' ~ s.id ~ '.mp3') %}
+      {% if clip %}<button class="say" data-say-audio="{{ clip }}" title="הַשְׁמֵעַ">🔊</button>{% endif %}
+    </a>
+    {% endfor %}
+  </div>
+  <a href="/history" class="parents-link">📅 הִיסְטוֹרְיָה לַהוֹרִים</a>
+</main>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}{{ subject.title }}{% endblock %}
+
+{% block content %}
+<main class="menu-page">
+  <h1>{{ subject.emoji }} {{ subject.title }}</h1>
+  <div class="menu-cards">
+    {% for it in subject['items'] %}
+      {% if it.url %}
+      <a class="menu-card" href="{{ it.url }}" style="--card-color: {{ subject.color }}">
+        <span class="menu-emoji">{{ it.emoji }}</span>
+        <span class="menu-title">{{ it.title }}</span>
+        {% set clip = audio_url('ui/menu_' ~ it.id ~ '.mp3') %}
+        {% if clip %}<button class="say" data-say-audio="{{ clip }}" title="הַשְׁמֵעַ">🔊</button>{% endif %}
+      </a>
+      {% else %}
+      <div class="menu-card disabled">
+        <span class="menu-emoji">{{ it.emoji }}</span>
+        <span class="menu-title">{{ it.title }}</span>
+      </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+</main>
+{% endblock %}

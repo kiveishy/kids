@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}עִבְרִית – הֲבָרוֹת{% endblock %}
+
+{% block content %}
+<header class="lesson-header">
+  <div class="topline">
+    <h1>🔤 הֲבָרוֹת</h1>
+    <div class="task-bar">
+      <span class="task-label">📋 הַמְּשִׂימָה שֶׁל הַיּוֹם:</span>
+      <div id="progress" class="progress">
+        <div class="progress-track"><div id="progress-fill" class="progress-fill"></div></div>
+        <span id="progress-text"></span>
+      </div>
+      <span id="done-badge" class="done-badge" hidden>✅ הֻשְׁלְמָה!</span>
+      <button id="reset-task" class="task-btn" hidden>🔄 לְהַתְחִיל מֵחָדָשׁ</button>
+    </div>
+  </div>
+  <nav id="letters" aria-label="אוֹתִיּוֹת"></nav>
+</header>
+
+<main>
+  <section class="letter-card">
+    <button id="random" class="random" title="אוֹת אַקְרָאִית">🎲 אוֹת אַחֶרֶת</button>
+    <button id="big-letter" class="big-letter" aria-label="שֵׁם הָאוֹת"></button>
+    <div id="letter-name" class="letter-name"></div>
+  </section>
+
+  <h2>הֲבָרוֹת</h2>
+  <section id="syllables" class="syllables"></section>
+
+  <h2>מִלִּים</h2>
+  <section id="words" class="words"></section>
+</main>
+
+<div id="success" class="overlay" hidden>
+  <div class="success-card">
+    <div class="confetti">🎉🏆🎉</div>
+    <h2>כָּל הַכָּבוֹד!</h2>
+    <p>הַמְּשִׂימָה שֶׁל הַיּוֹם הֻשְׁלְמָה!</p>
+    <p id="success-date" class="success-date"></p>
+    <button id="success-close" class="task-btn">👍 יוֹפִי</button>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+{% endblock %}

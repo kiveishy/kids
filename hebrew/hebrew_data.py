@@ -94,7 +94,7 @@ def syllable_say(letter, vowel):
 
 def audio_items():
     """Every clip the app needs: (relative_path, text_to_speak, kind)."""
-    items = []
+    items = [("ui/success.mp3", "כָּל הַכָּבוֹד! הַמְּשִׂימָה הֻשְׁלְמָה!", "word")]
     for letter in LETTERS:
         items.append((f"names/{letter['id']}.mp3", letter["name"], "name"))
         for vowel in VOWELS:

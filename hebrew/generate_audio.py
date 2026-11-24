@@ -18,7 +18,12 @@ truststore.inject_into_ssl()  # use the Windows certificate store (corporate pro
 
 import edge_tts  # noqa: E402
 
-from hebrew_data import audio_items  # noqa: E402
+import hebrew_data  # noqa: E402
+import menus  # noqa: E402
+
+
+def audio_items():
+    return menus.audio_items() + hebrew_data.audio_items()
 
 AUDIO_DIR = Path(__file__).parent / "static" / "audio"
 VOICE = "he-IL-HilaNeural"          # alternative male voice: he-IL-AvriNeural

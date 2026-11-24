@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}לוֹמְדִים{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="{% block body_class %}with-sidebar{% endblock %}">
+  <div class="page">
+    <div class="content">
+      {% block content %}{% endblock %}
+    </div>
+
+    {% block sidebar %}
+    {% set a_subject, a_item = active or (None, None) %}
+    <aside class="sidebar" aria-label="תַּפְרִיט">
+      <a href="/" class="tree-home">🏠 מָסָךְ רָאשִׁי</a>
+      <ul class="tree">
+        {% for s in subjects %}
+        <li>
+          <a href="{{ s.url }}" class="tree-subject {{ 'active' if a_subject == s.id and not a_item }} {{ 'open' if a_subject == s.id }}">
+            {{ s.emoji }} {{ s.title }}
+          </a>
+          <ul>
+            {% for it in s['items'] %}
+            <li>
+              {% if it.url %}
+              <a href="{{ it.url }}" class="tree-item {{ 'active' if a_item == it.id }}">{{ it.emoji }} {{ it.title }}</a>
+              {% else %}
+              <span class="tree-item disabled">{{ it.emoji }} {{ it.title }}</span>
+              {% endif %}
+            </li>
+            {% endfor %}
+          </ul>
+        </li>
+        {% endfor %}
+      </ul>
+      <a href="/history" class="tree-history {{ 'active' if a_subject == 'history' }}">📅 הִיסְטוֹרְיָה (לַהוֹרִים)</a>
+    </aside>
+    {% endblock %}
+  </div>
+
+  <script>
+    // 🔊 buttons on menu cards: speak the label without navigating.
+    document.querySelectorAll("[data-say-audio]").forEach((b) =>
+      b.addEventListener("click", (e) => {
+        e.preventDefault(); e.stopPropagation();
+        new Audio(b.dataset.sayAudio).play();
+      }));
+  </script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

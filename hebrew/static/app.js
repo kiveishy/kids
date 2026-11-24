@@ -4,6 +4,11 @@ const isMark = (ch) => /[֑-ׇ]/.test(ch);
 let lessons = [];
 let current = null;
 let audio = null;
+let session = null;          // current task from the DB (null = no task yet)
+let clicked = new Set();     // syllable ids clicked in this task
+let successAudio = null;
+
+const taskActive = () => session && !session.finished_at;
 
 const $ = (id) => document.getElementById(id);
 
@@ -110,11 +115,14 @@ function select(letter, speakName) {
   const syl = $("syllables");
   syl.innerHTML = "";
   for (const s of letter.syllables) {
-    syl.appendChild(tile("syllable", [
+    const t = tile("syllable", [
       span("syl-text", s.text),
       span("speaker", "🔊"),
       span("syl-vowel", s.vowel),
-    ], (el) => play(s, el)));
+    ], (el) => { play(s, el); markClicked(s.id, el); });
+    t.dataset.id = s.id;
+    t.classList.toggle("done", clicked.has(s.id));
+    syl.appendChild(t);
   }
 
   const words = $("words");
@@ -130,17 +138,96 @@ function select(letter, speakName) {
   if (speakName) play(letter, $("big-letter"));
 }
 
+const letterDone = (l) => l.syllables.every((s) => clicked.has(s.id));
+
 function randomLetter() {
-  const pool = lessons.filter((l) => l !== current);
+  let pool = lessons.filter((l) => l !== current);
+  // During a task, prefer letters the kid has not finished yet.
+  if (taskActive()) {
+    const open = pool.filter((l) => !letterDone(l));
+    if (open.length) pool = open;
+  }
   select(pool[Math.floor(Math.random() * pool.length)], true);
 }
 
+// ---------- today's task ----------
+const ACTIVITY = "syllables";
+
+function applySession(s) {
+  session = s;
+  clicked = new Set(s.clicked);   // a finished task keeps all its marks
+  renderProgress();
+}
+
+function renderProgress() {
+  const finished = !taskActive();
+  const done = clicked.size, total = session.total;
+  $("progress-fill").style.width = `${(100 * done) / total}%`;
+  $("progress-text").textContent = `${done} / ${total}`;
+  $("done-badge").hidden = !finished;
+  $("reset-task").hidden = !finished;
+  document.querySelectorAll(".letter-btn").forEach((b) => {
+    const l = lessons.find((x) => x.id === b.dataset.id);
+    const n = l.syllables.filter((s) => clicked.has(s.id)).length;
+    b.classList.toggle("done", n === l.syllables.length);
+    b.classList.toggle("partial", n > 0 && n < l.syllables.length);
+  });
+  document.querySelectorAll(".tile.syllable").forEach((t) =>
+    t.classList.toggle("done", clicked.has(t.dataset.id)));
+}
+
+async function markClicked(id, el) {
+  if (!taskActive() || clicked.has(id)) return;
+  clicked.add(id);
+  el.classList.add("done");
+  renderProgress();
+  try {
+    const r = await fetch(`/api/session/${session.id}/click`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ item: id }),
+    });
+    const { session: s, just_finished } = await r.json();
+    if (just_finished) {
+      applySession(s);
+      showSuccess(s.finished_at);
+    }
+  } catch (e) {
+    console.error("could not save click", e);
+  }
+}
+
+function showSuccess(when) {
+  $("success-date").textContent = when;
+  $("success").hidden = false;
+  setTimeout(() => {
+    if (successAudio) { if (audio) audio.pause(); audio = new Audio(successAudio); audio.play(); }
+    else speakFallback("כָּל הַכָּבוֹד! הַמְּשִׂימָה הֻשְׁלְמָה!");
+  }, 700);
+}
+
+async function resetToday() {
+  if (!confirm("לְהַתְחִיל מֵחָדָשׁ אֶת הַמְּשִׂימָה שֶׁל הַיּוֹם?\n(הַמְּשִׂימָה שֶׁהֻשְׁלְמָה תִּשָּׁאֵר בַּהִיסְטוֹרְיָה)")) return;
+  const r = await fetch(`/api/task/${ACTIVITY}/today/reset`, { method: "POST" });
+  applySession(await r.json());
+  select(lessons[0], true);
+}
+
 async function init() {
-  lessons = await (await fetch("/api/lessons")).json();
+  const data = await (await fetch("/api/lessons")).json();
+  lessons = data.letters;
+  successAudio = data.success_audio;
   renderLetterBar();
   $("random").addEventListener("click", randomLetter);
   $("big-letter").addEventListener("click", (e) => play(current, e.currentTarget));
-  select(lessons[Math.floor(Math.random() * lessons.length)], false);
+  $("reset-task").addEventListener("click", resetToday);
+  $("success-close").addEventListener("click", () => { $("success").hidden = true; });
+  // Today's task opens automatically (created on the first visit of the day).
+  const r = await fetch(`/api/task/${ACTIVITY}/today`, { method: "POST" });
+  applySession(await r.json());
+  // Continue where the kid stopped: first letter that is not finished yet.
+  const start = taskActive() ? lessons.find((l) => !letterDone(l)) : null;
+  select(start || lessons[0], false);
 }
 
 init();
