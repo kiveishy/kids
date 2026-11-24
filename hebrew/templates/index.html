@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>לוֹמְדִים לִקְרֹא – הֲבָרוֹת</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header>
+    <h1>לוֹמְדִים לִקְרֹא 📚</h1>
+    <nav id="letters" aria-label="אוֹתִיּוֹת"></nav>
+  </header>
+
+  <main>
+    <section class="letter-card">
+      <button id="random" class="random" title="אוֹת אַקְרָאִית">🎲 אוֹת אַחֶרֶת</button>
+      <button id="big-letter" class="big-letter" aria-label="שֵׁם הָאוֹת"></button>
+      <div id="letter-name" class="letter-name"></div>
+    </section>
+
+    <h2>הֲבָרוֹת</h2>
+    <section id="syllables" class="syllables"></section>
+
+    <h2>מִלִּים</h2>
+    <section id="words" class="words"></section>
+  </main>
+
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
