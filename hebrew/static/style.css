@@ -307,3 +307,89 @@ h2 { text-align: center; font-size: 1.6rem; margin: 22px 0 10px; }
 .word-emoji { font-size: 3.5rem; }
 .word-text { font-size: 2.6rem; line-height: 1.4; }
 .word-text .hl { color: var(--hl); }
+
+/* ---------- side menu: parents section ---------- */
+.tree-parents { margin-top: 18px; border-top: 1px solid rgba(255,255,255,.25); padding-top: 12px; }
+.tree-parents-title { display: block; padding: 4px 12px; opacity: .75; font-size: 1rem; }
+
+/* ---------- quiz ---------- */
+.quiz { max-width: 900px; }
+.quiz-card {
+  background: var(--card);
+  border-radius: 28px;
+  box-shadow: 0 6px 18px rgba(0,0,0,.08);
+  padding: 26px;
+  text-align: center;
+}
+.quiz-lead { font-size: 1.6rem; }
+.quiz-info { font-size: 1.3rem; color: #555; }
+.quiz-warn { font-size: 1.2rem; color: #b26a00; }
+.big-btn {
+  font: inherit;
+  font-size: 1.8rem;
+  padding: 14px 36px;
+  border: none;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+  margin: 10px;
+}
+.big-btn:disabled { background: #ccc; cursor: wait; }
+.task-btn.primary { background: var(--accent); color: #fff; }
+.task-btn.primary:hover { background: #ff6337; }
+
+.quiz-top { display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 1.3rem; }
+.q-dots { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; }
+.q-dots .dot {
+  min-width: 1.6rem; height: 1.6rem; line-height: 1.6rem; padding: 0 3px;
+  border-radius: 8px; background: #e7e3dc; font-size: 1rem;
+}
+.q-dots.big .dot { min-width: 2.6rem; height: 2.6rem; line-height: 2.6rem; font-size: 1.6rem; }
+.q-dots .dot.current { outline: 3px solid var(--accent-2); }
+.dot.correct { background: #9be29b; }
+.dot.very_close { background: #c9ef8f; }
+.dot.close { background: #ffe08a; }
+.dot.incorrect { background: #ffb3a7; }
+
+.q-syllable { font-size: 10rem; line-height: 1.15; margin: 10px 0; color: var(--ink); }
+
+.mic-btn {
+  font-size: 3.4rem;
+  width: 7rem; height: 7rem;
+  border-radius: 50%;
+  border: none;
+  background: var(--accent-2);
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(0,0,0,.2);
+}
+.mic-btn:disabled { background: #bbb; cursor: default; }
+.mic-btn.recording { background: #e8463a; animation: pulse 1s infinite; }
+@keyframes pulse { 50% { transform: scale(1.1); } }
+.level { width: 220px; height: 10px; margin: 12px auto 0; background: #eee; border-radius: 999px; overflow: hidden; }
+.level-fill { height: 100%; width: 0; background: #7cd67c; transition: width .05s; }
+.q-hint { font-size: 1.3rem; min-height: 1.6em; }
+
+.q-feedback { margin: 10px auto; padding: 10px 20px; border-radius: 20px; display: inline-block; animation: pop .3s ease-out; }
+.q-feedback.correct { background: #e1f7e1; }
+.q-feedback.very_close { background: #eef9dc; }
+.q-feedback.close { background: #fff5d6; }
+.q-feedback.incorrect { background: #ffe5e0; }
+.q-feedback.no_speech { background: #eef1f5; }
+.q-verdict-emoji { font-size: 3.5rem; }
+.q-verdict-text { font-size: 2rem; font-weight: bold; }
+.q-actions { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 12px; margin-top: 14px; }
+.q-attempts { color: #777; }
+.q-stars { font-size: 4rem; letter-spacing: 6px; }
+.q-score { font-size: 6rem; font-weight: bold; color: var(--accent); }
+
+/* ---------- parents settings ---------- */
+.settings, .settings-help {
+  background: #fff; border-radius: 20px; padding: 20px 26px; margin: 16px auto; max-width: 700px;
+  font-size: 1.15rem;
+}
+.settings label { display: flex; justify-content: space-between; align-items: center; margin: 12px 0; gap: 16px; }
+.settings input { font: inherit; width: 6rem; padding: 4px 8px; }
+.settings h2, .settings-help h2 { text-align: right; margin-top: 0; }
+.saved { margin-right: 12px; color: #2e8b2e; }

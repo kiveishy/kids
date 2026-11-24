@@ -1,4 +1,4 @@
-"""Generate the MP3 clips for every letter name, syllable and word.
+"""Generate the MP3 clips for menus, letter names, syllables, words and quiz feedback.
 
 Uses Microsoft neural text-to-speech (he-IL) via the free `edge-tts` package.
 Needs internet only while generating; the app itself plays local files.
@@ -20,31 +20,35 @@ import edge_tts  # noqa: E402
 
 import hebrew_data  # noqa: E402
 import menus  # noqa: E402
-
-
-def audio_items():
-    return menus.audio_items() + hebrew_data.audio_items()
+import quiz  # noqa: E402
 
 AUDIO_DIR = Path(__file__).parent / "static" / "audio"
 VOICE = "he-IL-HilaNeural"          # alternative male voice: he-IL-AvriNeural
 RATE = {"syllable": "-25%", "name": "-15%", "word": "-15%"}
 
 
-async def make(sem, path, text, kind):
+def audio_items():
+    """(relative path, text, tts options) for every clip the app needs."""
+    return [(rel, text, {"voice": VOICE, "rate": RATE[kind]})
+            for rel, text, kind in menus.audio_items() + hebrew_data.audio_items() + quiz.audio_items()]
+
+
+async def make(sem, path, text, opts):
     async with sem:
         path.parent.mkdir(parents=True, exist_ok=True)
         tmp = path.with_suffix(".tmp")
-        await edge_tts.Communicate(text, VOICE, rate=RATE[kind]).save(str(tmp))
+        await edge_tts.Communicate(text, opts["voice"], rate=opts.get("rate", "+0%"),
+                                   pitch=opts.get("pitch", "+0Hz")).save(str(tmp))
         tmp.replace(path)
 
 
 async def main(force):
-    todo = [(AUDIO_DIR / rel, text, kind) for rel, text, kind in audio_items()
+    todo = [(AUDIO_DIR / rel, text, opts) for rel, text, opts in audio_items()
             if force or not (AUDIO_DIR / rel).exists()]
     if not todo:
         print("Audio: all clips present.")
         return 0
-    print(f"Audio: generating {len(todo)} clip(s) with {VOICE} ...")
+    print(f"Audio: generating {len(todo)} clip(s) ...")
     sem = asyncio.Semaphore(6)
     results = await asyncio.gather(*(make(sem, *t) for t in todo), return_exceptions=True)
     failed = [(t, r) for t, r in zip(todo, results) if isinstance(r, Exception)]

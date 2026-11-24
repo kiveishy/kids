@@ -87,6 +87,23 @@ LETTERS = [
 ]
 
 
+# Spoken consonant of each letter in modern Israeli Hebrew. Letters with the
+# same code sound the same (ט/ת, כּ/ק, ב/ו, כ/ח, ס/שׂ, א/ע), so the quiz treats
+# them as the same sound.
+LETTER_SOUND = {
+    "alef": "", "bet": "b", "vet": "v", "gimel": "g", "dalet": "d", "he": "h",
+    "vav": "v", "zayin": "z", "het": "kh", "tet": "t", "yod": "y", "kaf": "k",
+    "khaf": "kh", "lamed": "l", "mem": "m", "nun": "n", "samekh": "s", "ayin": "",
+    "pe": "p", "fe": "f", "tsadi": "ts", "qof": "k", "resh": "r", "shin": "sh",
+    "sin": "s", "tav": "t",
+}
+
+
+def syllable_sound(letter, vowel):
+    """Phonetic code of a syllable, e.g. bet+kamatz -> 'ba', alef+hiriq -> 'i'."""
+    return LETTER_SOUND[letter["id"]] + vowel["sound"]
+
+
 def syllable_say(letter, vowel):
     override = SAY_OVERRIDES.get((letter["id"], vowel["id"]))
     return override or vowel["say"].format(c=letter["char"])

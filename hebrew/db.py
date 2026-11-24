@@ -25,7 +25,29 @@ CREATE TABLE IF NOT EXISTS clicks (
     clicked_at  TEXT    NOT NULL,
     PRIMARY KEY (session_id, item)
 );
+CREATE TABLE IF NOT EXISTS settings (
+    key   TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+);
+-- One row per quiz per day: the best score of the day is kept.
+CREATE TABLE IF NOT EXISTS quiz_scores (
+    activity    TEXT    NOT NULL,
+    day         TEXT    NOT NULL,
+    best_score  INTEGER NOT NULL,
+    last_score  INTEGER NOT NULL,
+    runs        INTEGER NOT NULL,
+    questions   INTEGER NOT NULL,
+    best_detail TEXT,
+    updated_at  TEXT    NOT NULL,
+    PRIMARY KEY (activity, day)
+);
 """
+
+# Parent-controlled settings and their defaults / allowed range.
+SETTINGS = {
+    "quiz_questions": {"default": 20, "min": 1, "max": 100},
+    "quiz_retries": {"default": 10, "min": 1, "max": 20},
+}
 
 
 def now():
@@ -114,6 +136,59 @@ def record_click(session_id, item, valid_items):
                 row = con.execute("SELECT * FROM sessions WHERE id = ?", (session_id,)).fetchone()
                 return _state(con, row), True
         return _state(con, row), False
+
+
+def get_settings():
+    with connect() as con:
+        stored = {r["key"]: r["value"] for r in con.execute("SELECT * FROM settings")}
+    return {k: int(stored.get(k, spec["default"])) for k, spec in SETTINGS.items()}
+
+
+def save_settings(values):
+    """Store valid settings (clamped to their range). Returns the saved settings."""
+    with connect() as con:
+        for key, spec in SETTINGS.items():
+            if key in values:
+                try:
+                    v = int(values[key])
+                except (TypeError, ValueError):
+                    continue
+                v = max(spec["min"], min(spec["max"], v))
+                con.execute("INSERT INTO settings VALUES (?, ?) "
+                            "ON CONFLICT(key) DO UPDATE SET value = excluded.value", (key, str(v)))
+    return get_settings()
+
+
+def save_quiz_score(activity, score, questions, detail_json):
+    """Keep one score row per quiz per day (the best). Returns (best_today, is_new_best)."""
+    with connect() as con:
+        row = con.execute("SELECT * FROM quiz_scores WHERE activity = ? AND day = ?",
+                          (activity, today())).fetchone()
+        if row is None:
+            con.execute("INSERT INTO quiz_scores VALUES (?, ?, ?, ?, 1, ?, ?, ?)",
+                        (activity, today(), score, score, questions, detail_json, now()))
+            return score, True
+        is_best = score > row["best_score"]
+        con.execute("""UPDATE quiz_scores SET last_score = ?, runs = runs + 1, updated_at = ?,
+                       best_score = MAX(best_score, ?),
+                       questions   = CASE WHEN ? THEN ? ELSE questions END,
+                       best_detail = CASE WHEN ? THEN ? ELSE best_detail END
+                       WHERE activity = ? AND day = ?""",
+                    (score, now(), score, is_best, questions, is_best, detail_json, activity, today()))
+        return max(score, row["best_score"]), is_best
+
+
+def quiz_best_today(activity):
+    with connect() as con:
+        row = con.execute("SELECT best_score, runs FROM quiz_scores WHERE activity = ? AND day = ?",
+                          (activity, today())).fetchone()
+        return dict(row) if row else None
+
+
+def quiz_history():
+    with connect() as con:
+        return [dict(r) for r in con.execute(
+            "SELECT * FROM quiz_scores ORDER BY day DESC, activity")]
 
 
 def history():

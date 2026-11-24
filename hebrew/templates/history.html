@@ -1,11 +1,40 @@
 {% extends "base.html" %}
-{% block title %}הִיסְטוֹרְיַת מְשִׂימוֹת{% endblock %}
+{% block title %}הִיסְטוֹרְיָה{% endblock %}
 
 {% block content %}
 <main>
-  <h1 class="page-title">📅 הִיסְטוֹרְיַת מְשִׂימוֹת</h1>
+  <h1 class="page-title">📅 הִיסְטוֹרְיָה</h1>
+
+  <h2>🎤 ציוני חידונים (הציון הטוב ביותר בכל יום)</h2>
+  {% if not quizzes %}
+    <p class="empty">עדיין אין חידונים.</p>
+  {% else %}
+  <table class="history">
+    <thead>
+      <tr><th>יום</th><th>חידון</th><th>ציון הכי טוב</th><th>ציון אחרון</th><th>מספר פעמים</th><th>שאלות</th><th>עדכון אחרון</th></tr>
+    </thead>
+    <tbody>
+    {% for q in quizzes %}
+      <tr>
+        <td>{{ q.day }}</td>
+        <td>{{ q.activity_name }}</td>
+        <td>
+          <div class="progress-track small"><div class="progress-fill" style="width: {{ q.best_score }}%"></div></div>
+          <b>{{ q.best_score }}</b>
+        </td>
+        <td>{{ q.last_score }}</td>
+        <td>{{ q.runs }}</td>
+        <td>{{ q.questions }}</td>
+        <td>{{ q.updated_at[11:] }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+
+  <h2>📋 משימות יומיות</h2>
   {% if not rows %}
-    <p class="empty">עֲדַיִן אֵין מְשִׂימוֹת.</p>
+    <p class="empty">עדיין אין משימות.</p>
   {% else %}
   <table class="history">
     <thead>

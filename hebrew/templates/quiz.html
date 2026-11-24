@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}חִידוֹן הֲבָרוֹת{% endblock %}
+
+{% block content %}
+<main class="quiz">
+  <h1 class="page-title">🎤 חִידוֹן הֲבָרוֹת</h1>
+
+  <!-- start screen -->
+  <section id="q-intro" class="quiz-card">
+    <p class="quiz-lead">אֲנִי אַרְאֶה לְךָ הֲבָרָה, וְאַתָּה תַּגִּיד אוֹתָהּ בְּקוֹל לַמִּיקְרוֹפוֹן.</p>
+    <p id="q-info" class="quiz-info"></p>
+    <p id="q-best" class="quiz-info"></p>
+    <p id="q-model" class="quiz-warn" hidden>⏳ מְכִינִים אֶת בּוֹדֵק הַדִּבּוּר... (רַק בַּפַּעַם הָרִאשׁוֹנָה)</p>
+    <p id="q-mic-error" class="quiz-warn" hidden>🎤 אֵין גִּישָׁה לַמִּיקְרוֹפוֹן. צָרִיךְ לְאַשֵּׁר אֶת הַמִּיקְרוֹפוֹן בַּדַּפְדְּפָן.</p>
+    <button id="q-start" class="big-btn">▶️ מַתְחִילִים</button>
+  </section>
+
+  <!-- question -->
+  <section id="q-question" class="quiz-card" hidden>
+    <div class="quiz-top">
+      <span id="q-counter"></span>
+      <div id="q-dots" class="q-dots"></div>
+    </div>
+    <div id="q-syllable" class="q-syllable"></div>
+
+    <button id="q-mic" class="mic-btn" aria-label="הַקְלָטָה">🎤</button>
+    <div class="level"><div id="q-level" class="level-fill"></div></div>
+    <p id="q-hint" class="q-hint">לְחַץ עַל הַמִּיקְרוֹפוֹן וְתַגִּיד אֶת הַהֲבָרָה</p>
+
+    <div id="q-feedback" class="q-feedback" hidden>
+      <div id="q-verdict-emoji" class="q-verdict-emoji"></div>
+      <div id="q-verdict-text" class="q-verdict-text"></div>
+    </div>
+
+    <div class="q-actions">
+      <button id="q-listen" class="task-btn" hidden>🔊 הַקְשֵׁב לַהֲבָרָה</button>
+      <button id="q-skip" class="task-btn">⏭️ דַּלֵּג</button>
+      <button id="q-next" class="task-btn primary" hidden>הַשְּׁאֵלָה הַבָּאָה ⬅️</button>
+    </div>
+    <p id="q-attempts" class="q-attempts"></p>
+  </section>
+
+  <!-- summary -->
+  <section id="q-summary" class="quiz-card" hidden>
+    <div id="q-stars" class="q-stars"></div>
+    <h2>הַצִּיּוּן שֶׁלְּךָ</h2>
+    <div id="q-score" class="q-score"></div>
+    <p id="q-summary-best" class="quiz-info"></p>
+    <div id="q-summary-dots" class="q-dots big"></div>
+    <div class="q-actions">
+      <button id="q-again" class="big-btn">🔁 עוֹד פַּעַם</button>
+      <a href="/hebrew" class="task-btn">⬅️ לְתַפְרִיט עִבְרִית</a>
+    </div>
+  </section>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='quiz.js') }}"></script>
+{% endblock %}

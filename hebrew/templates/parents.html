@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}הגדרות הורים{% endblock %}
+
+{% block content %}
+<main>
+  <h1 class="page-title">⚙️ הגדרות הורים</h1>
+  <form method="post" class="settings">
+    <h2>🎤 חידון</h2>
+    <label>
+      מספר שאלות בחידון
+      <input type="number" name="quiz_questions" value="{{ settings.quiz_questions }}"
+             min="{{ limits.quiz_questions.min }}" max="{{ limits.quiz_questions.max }}" required>
+    </label>
+    <label>
+      מספר ניסיונות לכל שאלה
+      <input type="number" name="quiz_retries" value="{{ settings.quiz_retries }}"
+             min="{{ limits.quiz_retries.min }}" max="{{ limits.quiz_retries.max }}" required>
+    </label>
+    <button type="submit" class="task-btn primary">💾 שמירה</button>
+    {% if saved %}<span class="saved">✅ נשמר</span>{% endif %}
+  </form>
+
+  <section class="settings-help">
+    <h2>איך החידון בודק?</h2>
+    <p>ההקלטה נבדקת במחשב עצמו (שום הקלטה לא נשלחת לאינטרנט) בעזרת מודל לזיהוי הגאים.
+       המודל משווה בין ההברה שהתבקשה להברות דומות (אותה אות עם תנועה אחרת, ואותה תנועה עם אות אחרת):</p>
+    <ul>
+      <li>✅ <b>נכון</b> – ההברה הנכונה היא המתאימה ביותר להקלטה (נקודה 1).</li>
+      <li>😃 <b>קרוב מאוד</b> – כמעט כמו ההברה המתאימה ביותר (0.75).</li>
+      <li>🙂 <b>קרוב</b> – דומה, או שהתבלבל בין צלילים קרובים מאוד כמו ב/בּ, פ/פּ, ו/וּ (0.5).</li>
+      <li>❌ <b>לא נכון</b> (0).</li>
+    </ul>
+    <p>הציון של שאלה הוא התוצאה הטובה ביותר מכל הניסיונות. ציון החידון = ממוצע × 100.
+       בכל יום נשמר רק הציון הטוב ביותר (וגם הציון האחרון ומספר הפעמים).</p>
+    <p>הבדיקה אינה מושלמת – במיוחד בין צלילים דומים מאוד. כדאי לשבת ליד הילד בפעמים הראשונות.</p>
+  </section>
+</main>
+{% endblock %}

@@ -15,6 +15,7 @@ SUBJECTS = [
         "color": "#ff7a59",
         "items": [
             {"id": "syllables", "title": "הֲבָרוֹת", "emoji": "🔤", "url": "/hebrew/syllables"},
+            {"id": "syllables-quiz", "title": "חִידוֹן הֲבָרוֹת", "emoji": "🎤", "url": "/hebrew/syllables/quiz"},
         ],
     },
     {

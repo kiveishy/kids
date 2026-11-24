@@ -36,7 +36,11 @@
         </li>
         {% endfor %}
       </ul>
-      <a href="/history" class="tree-history {{ 'active' if a_subject == 'history' }}">📅 הִיסְטוֹרְיָה (לַהוֹרִים)</a>
+      <div class="tree-parents">
+        <span class="tree-parents-title">👪 לַהוֹרִים</span>
+        <a href="/history" class="tree-item {{ 'active' if a_subject == 'history' }}">📅 הִיסְטוֹרְיָה</a>
+        <a href="/parents" class="tree-item {{ 'active' if a_subject == 'parents' }}">⚙️ הַגְדָּרוֹת</a>
+      </div>
     </aside>
     {% endblock %}
   </div>

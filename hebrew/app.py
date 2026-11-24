@@ -1,12 +1,19 @@
 """Kids learning app (Hebrew, later math) - Flask web app."""
+import json
 import os
+import threading
 from pathlib import Path
 
+import truststore
 from flask import Flask, abort, jsonify, render_template, request
 
-import db
-import menus
-from hebrew_data import LETTERS, VOWELS, syllable_say
+truststore.inject_into_ssl()  # Windows certificate store (needed behind corporate proxies)
+
+import db  # noqa: E402
+import menus  # noqa: E402
+import quiz  # noqa: E402
+import speech_match  # noqa: E402
+from hebrew_data import LETTERS, VOWELS, syllable_say  # noqa: E402
 
 BASE = Path(__file__).parent
 AUDIO_DIR = BASE / "static" / "audio"
@@ -49,6 +56,21 @@ def syllables_page():
     return render_template("syllables.html", active=("hebrew", "syllables"))
 
 
+@app.get("/hebrew/syllables/quiz")
+def syllables_quiz_page():
+    return render_template("quiz.html", active=("hebrew", "syllables-quiz"))
+
+
+@app.route("/parents", methods=["GET", "POST"])
+def parents_page():
+    saved = False
+    if request.method == "POST":
+        db.save_settings(request.form)
+        saved = True
+    return render_template("parents.html", settings=db.get_settings(), limits=db.SETTINGS,
+                           saved=saved, active=("parents", None))
+
+
 @app.get("/history")
 def history_page():
     names = {it["id"]: f"{s['title']} › {it['title']}" for s in menus.SUBJECTS for it in s["items"]}
@@ -62,7 +84,10 @@ def history_page():
             r["status"] = "open"
         else:
             r["status"] = "unfinished"
-    return render_template("history.html", rows=rows, active=("history", None))
+    quizzes = db.quiz_history()
+    for q in quizzes:
+        q["activity_name"] = names.get(q["activity"], q["activity"])
+    return render_template("history.html", rows=rows, quizzes=quizzes, active=("history", None))
 
 
 # ---------- API ----------
@@ -119,6 +144,55 @@ def click(session_id):
     return jsonify({"session": state, "just_finished": just_finished})
 
 
+# ---------- quiz API ----------
+QUIZ_ID = "syllables-quiz"
+
+
+@app.post("/api/quiz/syllables/new")
+def quiz_new():
+    s = db.get_settings()
+    return jsonify({
+        "questions": quiz.new_quiz(s["quiz_questions"]),
+        "retries": s["quiz_retries"],
+        "best_today": db.quiz_best_today(QUIZ_ID),
+        "model_ready": speech_match.scorer.ready,
+        "feedback_audio": {k: audio_url(f"ui/verdict_{k}.mp3") for k in quiz.VERDICT_TEXT},
+    })
+
+
+@app.get("/api/quiz/status")
+def quiz_status():
+    return jsonify({"model_ready": speech_match.scorer.ready})
+
+
+@app.post("/api/quiz/syllables/check")
+def quiz_check():
+    syllable_id = request.form.get("syllable", "")
+    upload = request.files.get("audio")
+    if syllable_id not in quiz.SYLLABLES or upload is None:
+        abort(400)
+    return jsonify(quiz.check(syllable_id, upload.stream))
+
+
+@app.post("/api/quiz/syllables/finish")
+def quiz_finish():
+    results = (request.get_json(silent=True) or {}).get("results", [])
+    verdicts = [r.get("verdict") for r in results if isinstance(r, dict)]
+    if not verdicts:
+        abort(400)
+    score = quiz.score(verdicts)
+    best, is_new_best = db.save_quiz_score(QUIZ_ID, score, len(verdicts), json.dumps(results))
+    return jsonify({"score": score, "best_today": best, "new_best": is_new_best})
+
+
+def _warm_up_model():
+    try:
+        speech_match.scorer.load()
+    except Exception as e:  # app still works without the quiz
+        print(f"Speech model could not be loaded: {e}")
+
+
 if __name__ == "__main__":
+    threading.Thread(target=_warm_up_model, daemon=True).start()
     port = int(os.environ.get("PORT", "5000"))
     app.run(host="127.0.0.1", port=port, debug=False)
